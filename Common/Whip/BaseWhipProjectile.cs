@@ -20,21 +20,27 @@ namespace BreadLibrary.Common.Whip
         /// </summary>
         /// <returns></returns>
         protected virtual IWhipMotion CreateMotion() => new WhipMotions.VanillaWhipMotion();
-
         protected ModularWhipController WhipController;
+        private bool _modifiersInitialized;
+
+        private void EnsureWhipControllerInitialized()
+        {
+            if (WhipController != null && _modifiersInitialized)
+                return;
+
+            WhipController = new ModularWhipController(CreateMotion());
+            SetupModifiers(WhipController);
+            _modifiersInitialized = true;
+        }
+
         private void ModifyControlPoints(List<Vector2> points)
         {
-            if (WhipController == null)
-            {
-                WhipController = new(CreateMotion());
-            }
+            EnsureWhipControllerInitialized();
 
             Projectile.GetWhipSettings(Projectile, out float timeToFlyOut, out int segments, out float rangeMultiplier);
 
             float progress = MathHelper.Clamp(Time / timeToFlyOut, 0f, 1f);
 
-
-            SetupModifiers(controller: WhipController);
             WhipController.Apply(
                 points,
                 Projectile,
@@ -42,8 +48,6 @@ namespace BreadLibrary.Common.Whip
                 rangeMultiplier,
                 progress
             );
-
-            //Main.NewText(WhipController.ToString());
         }
 
         #endregion
@@ -130,6 +134,14 @@ namespace BreadLibrary.Common.Whip
 
         public sealed override void AI()
         {
+            if(WhipController is null)
+            {
+                EnsureWhipControllerInitialized();
+            }
+
+
+
+
             Owner.heldProj = Projectile.whoAmI;
 
             Projectile.GetWhipSettings(
@@ -767,6 +779,7 @@ namespace BreadLibrary.Common.Whip
 
                 Color color = Lighting.GetColor(element.ToTileCoordinates());
 
+                if(texture is not null)
                 Main.spriteBatch.Draw(texture, pos - Main.screenPosition, frame, color, rotation, origin, scale, flip, 0);
 
                 pos += diff;

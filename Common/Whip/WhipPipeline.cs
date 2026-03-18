@@ -459,6 +459,107 @@ public static class WhipMotions
         }
     }
 
+  
+    public class CowboyWindupMotion : IWhipMotion
+    {
+        private readonly int precision;
+        private readonly float maxBlendStrength;
+
+        public CowboyWindupMotion(int precision = 30, float maxBlendStrength = 1f)
+        {
+            this.precision = Math.Max(8, precision);
+            this.maxBlendStrength = MathHelper.Clamp(maxBlendStrength, 0f, 1f);
+        }
+
+        public void Apply(List<Vector2> controlPoints, Projectile projectile, int segments, float rangeMultiplier, float progress)
+        {
+            if (controlPoints == null)
+                return;
+
+            List<Vector2> vanilla = new();
+            Projectile.FillWhipControlPoints(projectile, vanilla);
+
+            if (vanilla.Count < 2)
+            {
+                controlPoints.Clear();
+                controlPoints.AddRange(vanilla);
+                return;
+            }
+
+            Vector2 arm = Main.GetPlayerArmPosition(projectile);
+            int totalPoints = vanilla.Count;
+
+            Vector2 baseDir = vanilla[1] - vanilla[0];
+            if (baseDir.LengthSquared() < 0.0001f)
+                baseDir = projectile.velocity.LengthSquared() > 0.0001f ? projectile.velocity : Vector2.UnitX * projectile.spriteDirection;
+
+            float baseAngle = baseDir.ToRotation();
+
+            float vanillaLen = 0f;
+            for (int i = 1; i < totalPoints; i++)
+                vanillaLen += Vector2.Distance(vanilla[i - 1], vanilla[i]);
+
+            if (vanillaLen < 0.001f)
+                vanillaLen = 1f;
+
+            float p = MathHelper.Clamp(progress, 0f, 1f);
+
+            // Wind-up phase: tight curl overhead.
+            // Release phase: opens and extends outward.
+            // Interpolate the control points themselves over time.
+            Vector2 a0 = Vector2.Zero;
+            Vector2 a1 = Vector2.Lerp(new Vector2(-60f, -120f), new Vector2(30f, -90f), p);
+            Vector2 a2 = Vector2.Lerp(new Vector2(-130f, -20f), new Vector2(140f, -20f), p);
+            Vector2 a3 = Vector2.Lerp(new Vector2(-20f, 55f), new Vector2(235f, 10f), p);
+
+            BezierCurve template = new BezierCurve(a0, a1, a2, a3);
+
+            List<Vector2> local = template.GetEvenlySpacedPoints(totalPoints, precision);
+            float localLen = 0f;
+            for (int i = 1; i < local.Count; i++)
+                localLen += Vector2.Distance(local[i - 1], local[i]);
+
+            if (localLen < 0.001f)
+                localLen = 1f;
+
+            float scale = vanillaLen / localLen;
+
+            Vector2[] worldCP = new Vector2[template.ControlPoints.Length];
+            for (int i = 0; i < template.ControlPoints.Length; i++)
+            {
+                Vector2 rel = template.ControlPoints[i] * scale;
+
+                if (projectile.spriteDirection == -1)
+                    rel.X = -rel.X;
+
+                rel = rel.RotatedBy(baseAngle);
+                worldCP[i] = arm + rel;
+            }
+
+            BezierCurve worldCurve = new BezierCurve(worldCP);
+            List<Vector2> shaped = worldCurve.GetEvenlySpacedPoints(totalPoints, precision, true);
+
+            if (shaped.Count != totalPoints)
+            {
+                controlPoints.Clear();
+                controlPoints.AddRange(vanilla);
+                return;
+            }
+
+            // Strong at the start so the loop reads clearly, stays strong through release,
+            // then fades a bit at the very end so vanilla retraction still looks decent.
+            float weight =
+                p < 0.2f ? Utils.Remap(p, 0f, 0.2f, 0.85f, 1f) :
+                p < 0.75f ? 1f :
+                Utils.Remap(p, 0.75f, 1f, 1f, 0.35f);
+
+            weight = MathHelper.Clamp(weight, 0f, 1f) * maxBlendStrength;
+
+            controlPoints.Clear();
+            for (int i = 0; i < totalPoints; i++)
+                controlPoints.Add(Vector2.Lerp(vanilla[i], shaped[i], weight));
+        }
+    }
 }
 
 /// <summary>

@@ -10,13 +10,9 @@
 	<ItemGroup>
 	  <Compile Remove="Common\OldBaseWhipProjectile.cs" />
 	  <Compile Remove="Content\Demo\ExampleHelmet.cs" />
-	  <Compile Remove="Core\BaseClasses\Whip\BaseWhipItem.cs" />
-	  <Compile Remove="Core\BaseClasses\Whip\CleanBaseWhip.cs" />
-	  <Compile Remove="Core\BaseClasses\Whip\WhipPipeline.cs" />
 	</ItemGroup>
 	<ItemGroup>
 	  <Folder Include="Common\Graphics\" />
-	  <Folder Include="Core\BaseClasses\Whip\" />
 	</ItemGroup>
 
 	<!-- References -->

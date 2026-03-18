@@ -8,12 +8,12 @@ namespace BreadLibrary.Content.Demo
         #region IwhipMOtion
         protected override IWhipMotion CreateMotion()
         {
-            return new WhipMotions.VanillaWhipMotion();
+            return new WhipMotions.CowboyWindupMotion();
         }
 
         protected override void SetupModifiers(ModularWhipController controller)
         {
-            //controller.AddModifier(new WhipModifiers.TwirlModifier(4, 12, 0.05f* Projectile.spriteDirection));
+            //controller.AddModifier(new WhipModifiers.TwirlModifier(4, 12, 1f* Projectile.spriteDirection));
             //controller.AddModifier(new WhipModifiers.SmoothSineModifier(6, 30, 8f, 4f, 1f, Direction: Projectile.spriteDirection));
         }
         #endregion
@@ -22,7 +22,7 @@ namespace BreadLibrary.Content.Demo
             Projectile.aiStyle = -1;
         }
 
-        public override SoundStyle? WhipCrack_SFX => SoundID.AbigailAttack;
+        public override SoundStyle? WhipCrack_SFX => null;
         public override void Prepare()
         {
             AddHitEffects(BuffID.Electrified);
@@ -44,16 +44,13 @@ namespace BreadLibrary.Content.Demo
             _HeadOffset = new Vector2(0, -_HeadRectangle.Height/2f);
             _DebugMode = false;
             _ShouldDrawNormal = false;
-            _Head_VerticalFrames = 5;
-            baseWidth += 30;
+            _Head_VerticalFrames = 5;;
             return baseWidth + Math.Clamp(MathF.Sin(t * 10f) * 10f  * MathF.Tan(t * 14f + Main.GlobalTimeWrappedHourly*20f + Main.rand.NextFloat(4038f)) * MathHelper.SmoothStep(0, 1f, t), 1, 4);
         }
         protected override float RenderSpacing => 10f;
         public override float _PrimitiveScrollRate() => -1f;
         public override Color GetWhipColor(float t, float w)
         {
-            Projectile.alpha = 0;
-            return Color.White;
             return Color.Lerp(Color.White, Color.Blue, MathF.Sin(Main.GlobalTimeWrappedHourly)*MathF.Cos(t*10f));
         }
         public float Saturate(float x)

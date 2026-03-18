@@ -12,7 +12,9 @@ namespace BreadLibrary.Core.Graphics.Particles
         public bool IsRestingInPool { get; private set; }
 
         public bool ShouldBeRemovedFromRenderer { get; protected set; }
+        
 
+        //public static ParticlePool<> pool = new(500, GetNewParticle<>);
         public virtual void FetchFromPool()
         {
             IsRestingInPool = false;
