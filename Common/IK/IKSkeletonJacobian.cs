@@ -12,10 +12,28 @@
         public float[] MaxAngles;
         public float[] RestAngles;
         public int JointCount => Lengths.Length;
-        //TODO: CREATE another constructor which 
         public IKSkeletonJacobian(Vector2 root, float[] lengths)
         {
             Root = root;
+            Lengths = lengths;
+            Angles = new float[lengths.Length];
+            JointPositions = new Vector2[lengths.Length + 1];
+
+
+            MinAngles = new float[lengths.Length];
+            MaxAngles = new float[lengths.Length];
+            RestAngles = new float[lengths.Length];
+        }
+
+        public IKSkeletonJacobian(Vector2 root, float Length, int amount)
+        {
+            Root = root;
+            float[] lengths = new float[amount];
+            for(int i = 0; i< lengths.Length; i++)
+            {
+                lengths[i] = Length;
+            }
+
             Lengths = lengths;
             Angles = new float[lengths.Length];
             JointPositions = new Vector2[lengths.Length + 1];

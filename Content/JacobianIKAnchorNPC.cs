@@ -1,5 +1,6 @@
 ﻿using BreadLibrary.Common.IK;
 using BreadLibrary.Core;
+using BreadLibrary.Core.Utilities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Graphics.PackedVector;

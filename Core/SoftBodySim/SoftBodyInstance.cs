@@ -147,7 +147,7 @@
                 );
             }
 
-            for (int i = 0; i < Sim.Nodes.Count - 1; i++) { Utilities.DrawLineBetter(Main.spriteBatch, Sim.Nodes[i].Pos, Sim.Nodes[i + 1].Pos, Color.Aqua, 2f); }
+            for (int i = 0; i < Sim.Nodes.Count - 1; i++) { Utilities.Utilities.DrawLineBetter(Main.spriteBatch, Sim.Nodes[i].Pos, Sim.Nodes[i + 1].Pos, Color.Aqua, 2f); }
 
 
             Main.spriteBatch.End();
