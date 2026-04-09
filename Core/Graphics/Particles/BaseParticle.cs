@@ -1,20 +1,33 @@
-﻿using System;
+﻿using BreadLibrary.Core.Graphics.PixelationShit;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Terraria.Graphics.Renderers;
 
 namespace BreadLibrary.Core.Graphics.Particles
 {
-    public abstract class BaseParticle : IPooledParticle
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+    public sealed class PoolCapacityAttribute(int capacity) : Attribute
     {
+        public int Capacity { get; } = capacity;
+    }
+
+    public abstract class BaseParticle<T> : IDrawPixellated, IPooledParticle where T : IPooledParticle, new()
+    {
+        public const int DEFAULT_POOL_CAPACITY = 100;
+
+        public static ParticlePool<T> Pool { get; } = new ParticlePool<T>(typeof(T).GetCustomAttribute<PoolCapacityAttribute>()?.Capacity ?? DEFAULT_POOL_CAPACITY, GetNewParticle);
+
+        protected static T GetNewParticle() => new T();
+
         public bool IsRestingInPool { get; private set; }
 
         public bool ShouldBeRemovedFromRenderer { get; protected set; }
-        
+        public abstract PixelLayer PixelLayer { get; }
 
-        //public static ParticlePool<> pool = new(500, GetNewParticle<>);
         public virtual void FetchFromPool()
         {
             IsRestingInPool = false;
@@ -26,13 +39,14 @@ namespace BreadLibrary.Core.Graphics.Particles
             IsRestingInPool = true;
         }
 
-        public virtual void Draw(ref ParticleRendererSettings settings, SpriteBatch spritebatch) { }
-
-        public virtual void Update(ref ParticleRendererSettings settings) { }
-
-        protected static T GetNewParticle<T>() where T : BaseParticle, new()
+        public virtual void Draw(ref ParticleRendererSettings settings, SpriteBatch spritebatch)
         {
-            return new T();
         }
+
+        public virtual void Update(ref ParticleRendererSettings settings)
+        {
+        }
+
+        public abstract void DrawPixelated(SpriteBatch spriteBatch);
     }
 }
