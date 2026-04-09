@@ -1,9 +1,10 @@
 ﻿
-    using System;
-    using System.Collections.Generic;
-    using global::BreadLibrary.Core.Graphics.PixelationShit;
+using BreadLibrary.Core.Graphics.Particles;
+using global::BreadLibrary.Core.Graphics.PixelationShit;
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
+    using System;
+    using System.Collections.Generic;
     using Terraria;
     using Terraria.ModLoader;
 
@@ -54,6 +55,7 @@ namespace BreadLibrary.Core.Graphics
         private static readonly List<IDrawPixellated> AboveNPCsDraws = new();
         private static readonly List<IDrawPixellated> AboveProjectilesDraws = new();
         private static readonly List<IDrawPixellated> AbovePlayersDraws = new();
+        private static readonly List<IDrawPixellated> scratchPixelDraws = new();
 
         private static RenderTarget2D behindTilesTarget;
         private static RenderTarget2D aboveTilesTarget;
@@ -208,6 +210,11 @@ namespace BreadLibrary.Core.Graphics
                     Queue(pixelNpc);
             }
 
+            scratchPixelDraws.Clear();
+            ParticleEngine.CollectPixelatedParticles(scratchPixelDraws);
+
+
+
             // Custom/player-linked drawers
             if (CollectPlayerPixelDrawersEvent is not null)
             {
@@ -232,7 +239,6 @@ namespace BreadLibrary.Core.Graphics
                     }
                 }
             }
-
             // Anything else a mod wants to push in manually
             if (CollectPixelDrawsEvent is not null)
             {
